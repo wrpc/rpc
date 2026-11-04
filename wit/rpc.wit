@@ -87,7 +87,8 @@ interface context {
 /// discarded and fails the invocation, at the latest once all incoming
 /// channels of the invocation have been dropped.
 ///
-/// Failures of an invocation are reported by the future returned by `invoke`.
+/// Failures to transmit an invocation and to receive its data are reported by
+/// the future returned by `invoke`.
 interface transport {
     use error.{error};
 
@@ -199,14 +200,14 @@ interface invoker {
     /// The host may limit the total number of indices in `paths`, failing the
     /// invocation and declaring no positions if they exceed it.
     ///
-    /// The returned future resolves once the invocation has completed, which
-    /// is once both of its directions have ended and all of its channels and
-    /// the streams taken from them have been dropped. It resolves to an error
-    /// if the invocation has failed at any point, including transmitting the
-    /// invocation itself and after all `read-via-stream` and
-    /// `write-via-stream` futures and `close` calls have completed, and to
-    /// success otherwise. Once the invocation is transmitted, dropping the
-    /// returned future does not cancel it.
+    /// The returned future resolves once the incoming direction of the
+    /// invocation has ended and all of its incoming channels and the streams
+    /// taken from them have been dropped. It resolves to an error if
+    /// transmitting the invocation itself or receiving has failed at any point,
+    /// including after all `read-via-stream` futures have completed, and to
+    /// success otherwise. Failures to send are reported by `write-via-stream`
+    /// and `close`. Once the invocation is transmitted, dropping the returned
+    /// future does not cancel it.
     invoke: func(cx: context, instance: string, name: string, params: list<u8>, paths: list<list<option<u32>>>) -> tuple<outgoing-channel, incoming-channel, future<result<_, error>>>;
 }
 
