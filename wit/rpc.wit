@@ -205,9 +205,10 @@ interface invoker {
     /// taken from them have been dropped. It resolves to an error if
     /// transmitting the invocation itself or receiving has failed at any point,
     /// including after all `read-via-stream` futures have completed, and to
-    /// success otherwise. Failures to send are reported by `write-via-stream`
-    /// and `close`. Once the invocation is transmitted, dropping the returned
-    /// future does not cancel it.
+    /// success otherwise. It does not reflect sending: `write-via-stream` and
+    /// `close` report whether data was accepted for transmission, and data
+    /// lost after that is not reported. Once the invocation is transmitted,
+    /// dropping the returned future does not cancel it.
     invoke: func(cx: context, instance: string, name: string, params: list<u8>, paths: list<list<option<u32>>>) -> tuple<outgoing-channel, incoming-channel, future<result<_, error>>>;
 }
 
