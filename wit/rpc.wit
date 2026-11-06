@@ -55,9 +55,10 @@ interface context {
 /// are read, one frame at a time: a frame received for a position is held
 /// until the stream of that position is read, which stalls all other
 /// positions, so the streams of all declared positions must be read
-/// concurrently. Data received for a position, whose stream was dropped
-/// before the position was closed, or whose channel was dropped without
-/// taking its data, fails the invocation.
+/// concurrently. A frame received for a position, which was not declared or
+/// is closed, fails the invocation, as does data received for a position,
+/// whose stream was dropped before the position was closed, or whose channel
+/// was dropped without taking its data.
 ///
 /// Failures to transmit the invocation are returned by `invoke`, failures to
 /// receive by the future returned by `read-via-stream` and failures to send
@@ -93,8 +94,9 @@ interface transport {
         /// Returns the channel for the position at `path`.
         ///
         /// Traps if `path` is empty, or if the channel for the position was
-        /// already returned. Data written to a position, which the peer has
-        /// not declared, fails the invocation on the peer.
+        /// already returned. Writing to a position, which the peer has not
+        /// declared, or closing it by dropping its channel, fails the
+        /// invocation on the peer.
         index: func(path: list<u32>) -> outgoing-channel;
     }
 }
