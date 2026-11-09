@@ -60,7 +60,7 @@ interface context {
 /// whose stream was dropped before the position was closed, or whose channel
 /// was dropped without taking its data.
 ///
-/// Failures to transmit the invocation are returned by `invoke`, failures to
+/// Failures to start the invocation are returned by `invoke`, failures to
 /// receive by the future returned by `read-via-stream` and failures to send
 /// by `write-via-stream`.
 interface transport {
@@ -106,20 +106,19 @@ interface invoker {
     use error.{error};
     use transport.{incoming-channel, outgoing-channel};
 
-    /// Invoke a function, returning once the invocation is transmitted, or an
-    /// error if transmitting it fails.
+    /// Invoke a function, returning once the invocation is started, or an
+    /// error if starting it fails.
     ///
-    /// `params` is the encoded parameter tuple, sent along with the invocation,
-    /// which closes the root position. The async values within the parameters
-    /// are written to the channels returned by `index` on the returned root
-    /// `outgoing-channel`.
+    /// The data of the returned root `outgoing-channel` is the encoded
+    /// parameter tuple. The async values within the parameters are written to
+    /// the channels returned by `index` on it.
     ///
     /// The data of the returned root `incoming-channel` is the encoded result
     /// tuple. `paths` declares the positions of the async values within the
     /// results, which are read from the channels returned by `index` on it.
     /// The host may limit the total number of indices in `paths`, returning an
     /// error if they exceed it.
-    invoke: async func(cx: context, instance: string, name: string, params: list<u8>, paths: list<list<option<u32>>>) -> result<tuple<outgoing-channel, incoming-channel>, error>;
+    invoke: async func(cx: context, instance: string, name: string, paths: list<list<option<u32>>>) -> result<tuple<outgoing-channel, incoming-channel>, error>;
 }
 
 world imports {
